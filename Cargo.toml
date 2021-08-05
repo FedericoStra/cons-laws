@@ -1,0 +1,24 @@
+[package]
+name = "cons-laws"
+version = "0.1.0"
+edition = "2018"
+authors = ["Federico Stra <stra.federico@gmail.com>"]
+description = "Particle method to solve 1D conservation laws"
+license = "MIT"
+repository = "https://github.com/FedericoStra/cons-laws"
+keywords = ["mathematics", "numerical analysis", "conservation laws", "particles", "PDE", "ODE"]
+categories = ["algorithms", "mathematics", "science", "simulation"]
+
+[dependencies]
+mathru = "0.9.1"
+num-traits = "0.2.14"
+
+[dev-dependencies]
+float-ord = "0.3.2"
+nalgebra = "0.28.0"
+plotters = "0.3.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.release]
+# lto = true
