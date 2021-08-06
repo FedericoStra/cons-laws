@@ -6,8 +6,7 @@
 ![Lifecycle](https://img.shields.io/badge/lifecycle-retired-orange.svg)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-archived-red.svg)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-dormant-blue.svg) -->
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://FedericoStra.github.io/cons-laws/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://FedericoStra.github.io/cons-laws/dev)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.rs/cons-laws)
 [![Build Status](https://github.com/FedericoStra/cons-laws/workflows/CI/badge.svg)](https://github.com/FedericoStra/cons-laws/actions)
 
 This crate implements the deterministic particle schemes described in the article
