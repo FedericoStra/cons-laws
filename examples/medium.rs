@@ -1,6 +1,6 @@
 use mathru::{
     algebra::linear::Vector,
-    analysis::differential_equation::ordinary::{DormandPrince, ExplicitODE, ProportionalControl},
+    analysis::differential_equation::ordinary::{CashKarp45, ExplicitODE, ProportionalControl},
 };
 use num_traits;
 use plotters::prelude::*;
@@ -9,8 +9,12 @@ use cons_laws::*;
 
 #[inline]
 #[allow(non_snake_case, unused_variables)]
-fn V<T: num_traits::One>(t: T, x: T) -> T {
-    T::one()
+fn V<T: num_traits::real::Real>(t: T, x: T) -> T {
+    if t < T::from(5).unwrap() {
+        T::one()
+    } else {
+        -T::one()
+    }
 }
 
 #[inline]
@@ -129,16 +133,17 @@ fn main() -> Result<(), &'static str> {
     let integ_inter = IntegratedInteraction::new(W);
 
     // Create a ODE solver instance
-    let h_0: f64 = 0.0001;
-    let fac: f64 = 0.9;
-    let fac_min: f64 = 0.01;
-    let fac_max: f64 = 2.0;
+    let h_0: f64 = 0.001;
+    let fac: f64 = 0.95;
+    let fac_min: f64 = 0.1;
+    let fac_max: f64 = 1.5;
     let n_max: u32 = 200000;
-    let abs_tol: f64 = 10e-8;
-    let rel_tol: f64 = 10e-8;
+    let abs_tol: f64 = 0.5e-7;
+    let rel_tol: f64 = 0.5e-7;
 
     let solver: ProportionalControl<f64> =
         ProportionalControl::new(n_max, h_0, fac, fac_min, fac_max, abs_tol, rel_tol);
+    let method = CashKarp45::default();
 
     let root_area = BitMapBackend::new("./figures/medium.png", (800, 600)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
@@ -148,7 +153,7 @@ fn main() -> Result<(), &'static str> {
         .set_label_area_size(LabelAreaPosition::Left, 40)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .caption("Particle trajectories", ("Arial", 20))
-        .build_cartesian_2d(0.0..5.0, 0.0..3.5)
+        .build_cartesian_2d(0.0..10.0, -2.0..3.5)
         .unwrap();
 
     ctx.configure_mesh()
@@ -162,14 +167,14 @@ fn main() -> Result<(), &'static str> {
     // ODE with sampled interaction
     let problem = ConservationLaw {
         t_start: 0.0,
-        t_end: 5.0,
+        t_end: 10.0,
         n: 80,
         vel: V,
         int: sampl_inter,
     };
 
     let clock_time = std::time::SystemTime::now();
-    let (t, x): (Vec<f64>, Vec<Vector<f64>>) = solver.solve(&problem, &DormandPrince::default())?;
+    let (t, x): (Vec<f64>, Vec<Vector<f64>>) = solver.solve(&problem, &method)?;
 
     println!("{:?}", clock_time.elapsed().unwrap());
     println!("{} steps", t.len());
@@ -188,14 +193,14 @@ fn main() -> Result<(), &'static str> {
     // ODE with sampled interaction
     let problem = ConservationLaw {
         t_start: 0.0,
-        t_end: 5.0,
+        t_end: 10.0,
         n: 80,
         vel: V,
         int: integ_inter,
     };
 
     let clock_time = std::time::SystemTime::now();
-    let (t, x): (Vec<f64>, Vec<Vector<f64>>) = solver.solve(&problem, &DormandPrince::default())?;
+    let (t, x): (Vec<f64>, Vec<Vector<f64>>) = solver.solve(&problem, &method)?;
 
     println!("{:?}", clock_time.elapsed().unwrap());
     println!("{} steps", t.len());
