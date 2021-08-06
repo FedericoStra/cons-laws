@@ -94,7 +94,12 @@ where
         let mut len = 0;
         for y in p.into_iter() {
             len += 1;
-            sum = sum + self.0(t, x - y);
+            let r = x - y;
+            // The function `self.0` (which is `W'`) must return `0` if `y == x`.
+            // We can ensure it here by skipping the `x` when we encounter it.
+            if r != X::zero() {
+                sum = sum + self.0(t, r);
+            }
         }
         -X::from(sum).unwrap() / X::from(len - 1).unwrap()
     }
