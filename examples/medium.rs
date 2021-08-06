@@ -17,7 +17,12 @@ fn V<T: num_traits::One>(t: T, x: T) -> T {
 #[allow(non_snake_case, unused_variables)]
 fn Wprime<T: num_traits::real::Real>(t: T, x: T) -> T {
     let one = T::one();
-    x.signum() / (one + x.abs())
+    let zero = T::zero();
+    if x != zero {
+        x.signum() / (one + x.abs())
+    } else {
+        zero
+    }
 }
 
 #[inline]
