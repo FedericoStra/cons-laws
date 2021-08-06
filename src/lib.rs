@@ -1,7 +1,37 @@
+//! Deterministic particle methods for 1D conservation laws.
+//!
+//! This crate implements the deterministic particle schemes described in the article
+//! *Entropy solutions of non-local scalar conservation laws with congestion via deterministic particle method*,
+//! E. Radici, F. Stra, (2021), [https://arxiv.org/abs/2107.10760](https://arxiv.org/abs/2107.10760).
+//!
+//! You can cite the article as
+//!
+//! ```text
+//! @online{RadiciStra2021,
+//!     title={Entropy solutions of non-local scalar conservation laws with congestion via deterministic particle method},
+//!     author={Emanuela Radici and Federico Stra},
+//!     year={2021},
+//!     eprint={2107.10760},
+//!     archivePrefix={arXiv},
+//!     primaryClass={math.AP},
+//!     url={https://arxiv.org/abs/2107.10760}
+//! }
+//! ```
+//!
+//! This is a reimplementation in Rust of the Julia package [ConservationLawsParticles.jl](https://github.com/FedericoStra/ConservationLawsParticles.jl).
+//!
+//! $1+2$
+//!
+//! $$
+//! \frac{dy}{dt}=f(t, y)
+//! $$
+
+/// A time-dependent velocity field that affects the particles.
 pub trait ExternalVelocity<T, X = T> {
     fn eval(&self, t: T, x: X) -> X;
 }
 
+/// A time-dependent interaction between the particles.
 pub trait Interaction<T, X = T> {
     fn eval<P>(&self, t: T, x: X, p: P) -> X
     where
