@@ -6,16 +6,7 @@ pub trait Interaction<T, X = T> {
     fn eval<P>(&self, t: T, x: X, p: P) -> X
     where
         P: IntoIterator<Item = X>;
-    // <P as IntoIterator>::IntoIter: ExactSizeIterator;
 }
-
-// pub trait InteractionPotential<T, P, X = T> {
-//     fn eval(&self, t: T, x: X, p: P) -> X;
-// }
-
-// pub trait Particles<X> {
-// fn get<I>(species: I, i: I) -> X;
-// }
 
 mod zero_fields;
 pub use zero_fields::{ZeroInteraction, ZeroVelocity};
@@ -65,9 +56,7 @@ where
     fn eval<P>(&self, t: T, x: X, p: P) -> X
     where
         P: IntoIterator<Item = X>,
-        // <P as IntoIterator>::IntoIter: ExactSizeIterator,
     {
-        // -p.into_iter().map(|y| self.0(t, x - y)).sum::<X>()
         let mut sum = X::zero();
         let mut len = 0;
         for y in p.into_iter() {
@@ -101,11 +90,8 @@ where
     fn eval<P>(&self, t: T, x: X, p: P) -> X
     where
         P: IntoIterator<Item = X>,
-        // <P as IntoIterator>::IntoIter: ExactSizeIterator,
     {
         let mut p = p.into_iter().peekable();
-        // let len = p.len() - 1;
-        // let f = X::from(len).unwrap().recip();
         let mut total = X::zero();
         let mut left_dens = X::zero();
         let mut len = 0;
