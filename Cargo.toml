@@ -1,6 +1,6 @@
 [package]
 name = "cons-laws"
-version = "0.1.1-alpha.0"
+version = "0.1.1"
 edition = "2018"
 authors = ["Federico Stra <stra.federico@gmail.com>"]
 description = "Particle method to solve 1D conservation laws"
