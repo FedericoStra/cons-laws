@@ -27,3 +27,6 @@ plotters = "0.3.1"
 
 [profile.release]
 # lto = true
+
+[package.metadata.release]
+no-dev-version = true
