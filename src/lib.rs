@@ -18,13 +18,55 @@
 //! }
 //! ```
 //!
-//! This is a reimplementation in Rust of the Julia package [ConservationLawsParticles.jl](https://github.com/FedericoStra/ConservationLawsParticles.jl).
+//! This is a reimplementation in Rust of the Julia package
+//! [ConservationLawsParticles.jl](https://github.com/FedericoStra/ConservationLawsParticles.jl).
 //!
-//! $1+2$
+//! # What's the goal?
+//!
+//! The conservation law to be solved is
 //!
 //! $$
-//! \frac{dy}{dt}=f(t, y)
+//! \partial_t\rho(t,x) + \mathop{\mathrm{div}}_x\bigl[\rho(t,x)v\bigl(\rho(t,x)\bigr)\bigl(V(t,x)-(\partial_xW*\rho)(t,x)\bigr)\bigr] = 0 ,
 //! $$
+//!
+//! where
+//!
+//! - $V:[0,\infty)\times\mathbb{R}\to\mathbb{R}$ is the external velocity,
+//! - $W:[0,\infty)\to\mathbb{R}$ is the interaction potential,
+//! - $v:[0,\infty)\to[0,\infty)$ is a non increasing function to model congestion,
+//! - the convolution is performed in space only.
+//!
+//! The approach to solve the conservation law is by tracking the motion of $N+1$ particles
+//! $X=(x_0,x_1,\dots,x_N)$ such that between each consecutive pair of particles there is
+//! a fraction $1/N$ of the total mass.
+//!
+//! Two deterministic particle schemes are described: one with integrated interaction $(\mathrm{ODE}_I)$ and one with sampled interaction $(\mathrm{ODE}_S)$:
+//!
+//! ```math
+//! \begin{aligned}
+//! (\mathrm{ODE}_I): & \left\{\begin{aligned}
+//! x_i'(t) &= v_i(t) \bar U_i(t), \\
+//! \bar U_i(t) &= V\bigl(t,x_i(t)\bigr) - (W*\partial_x\bar\rho)\bigl(t,x_i(t)\bigr)
+//!     = V\bigl(t,x_i(t)\bigr) - \sum_{j=0}^N(\rho_{j+1}(t) - \rho_j(t)) W\bigl(t,x_i(t)-x_j(t)\bigr), \\
+//! v_i(t) &= \begin{cases}
+//!     v\bigl(\rho_i(t)\bigr), & \text{if } \bar U_i(t) < 0, \\
+//!     v\bigl(\rho_{i+1}(t)\bigr), & \text{if } \bar U_i(t) \geq 0, \end{cases}
+//! \end{aligned}\right. \\
+//! (\mathrm{ODE}_S): & \left\{\begin{aligned}
+//! x_i'(t) &= v_i(t) \dot U_i(t), \\
+//! \dot U_i(t) &= V\bigl(t,x_i(t)\bigr) - (\partial_xW*\dot\rho)\bigl(t,x_i(t)\bigr)
+//!     = V\bigl(t,x_i(t)\bigr) - \frac1N\sum_{j=0}^NW'\bigl(t,x_i(t)-x_j(t)\bigr), \\
+//! v_i(t) &= \begin{cases}
+//!     v\bigl(\rho_i(t)\bigr), & \text{if } \dot U_i(t) < 0, \\
+//!     v\bigl(\rho_{i+1}(t)\bigr), & \text{if } \dot U_i(t) \geq 0. \end{cases}
+//! \end{aligned}\right.
+//! \end{aligned}
+//! ```
+//!
+//! Here $\rho_i$ denotes the quantity $\frac1{N(x_i-x_{i-1})}$,
+//! $\bar\rho$ is the piecewise constant density $\sum_{i=1}^N \rho_i 1_{[x_{i-1},x_i]}$
+//! and $\dot\rho$ is the atomic measure $\frac1N \sum_{i=0}^N \delta_{x_i}$.
+//! Notice that $\dot\rho$ is not a probability.
 
 /// A time-dependent velocity field that affects the particles.
 pub trait ExternalVelocity<T, X = T> {
