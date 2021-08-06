@@ -8,8 +8,8 @@ pub trait Interaction<T, X = T> {
         P: IntoIterator<Item = X>;
 }
 
-mod zero_fields;
-pub use zero_fields::{ZeroInteraction, ZeroVelocity};
+mod _zero;
+pub use _zero::{ZeroInteraction, ZeroVelocity};
 
 pub struct Velocity<V>(V);
 
@@ -24,6 +24,7 @@ impl<T, X, V> ExternalVelocity<T, X> for Velocity<V>
 where
     V: Fn(T, X) -> X,
 {
+    #[inline]
     fn eval(&self, t: T, x: X) -> X {
         self.0(t, x)
     }
@@ -33,6 +34,7 @@ impl<T, X, V> ExternalVelocity<T, X> for V
 where
     V: Fn(T, X) -> X,
 {
+    #[inline]
     fn eval(&self, t: T, x: X) -> X {
         self(t, x)
     }
