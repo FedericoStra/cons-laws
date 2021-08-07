@@ -20,6 +20,12 @@
         for (var i = 0; i < maths.length; i++) {
             var el = maths[i];
             katex.render(el.innerText, el, {displayMode: true});
+            // replace outer <pre> with <p>
+            var p = document.createElement("p");
+            for (var i = 0; i < el.children.length; i++) {
+                p.appendChild(el.children[i]);
+            }
+            el.parentNode.parentNode.replaceChild(p, el.parentNode);
         }
 
         // var codes = document.getElementsByTagName("code");
