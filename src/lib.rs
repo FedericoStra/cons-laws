@@ -68,6 +68,8 @@
 //! and $\dot\rho$ is the atomic measure $\frac1N \sum_{i=0}^N \delta_{x_i}$.
 //! Notice that $\dot\rho$ is not a probability.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 /// A time-dependent velocity field that affects the particles.
 pub trait ExternalVelocity<T, X = T> {
     fn eval(&self, t: T, x: X) -> X;
@@ -185,6 +187,59 @@ where
             left_dens = right_dens;
         }
         -total / X::from(len - 1).unwrap()
+    }
+}
+
+pub struct ConservationLaw<T, X, Vel, Int, Mob> {
+    pub vel: Vel,
+    pub int: Int,
+    pub mob: Mob,
+    _t: std::marker::PhantomData<T>,
+    _x: std::marker::PhantomData<X>,
+}
+
+#[cfg(feature = "ode_solver")]
+pub use _ode_solver::*;
+
+#[cfg(feature = "ode_solver")]
+#[cfg_attr(docrs, doc(cfg(any(feature = "ode_solver"))))]
+mod _ode_solver {
+    use super::*;
+
+    use ode_solvers::{SVector, System};
+
+    impl<X, Vel, Int, Mob, const N: usize> System<SVector<X, N>>
+        for ConservationLaw<f64, X, Vel, Int, Mob>
+    where
+        Vel: ExternalVelocity<f64, X>,
+        Int: Interaction<f64, X>,
+        Mob: Mobility<f64, X>,
+        X: num_traits::real::Real + nalgebra::base::Scalar,
+    {
+        fn system(&self, t: f64, x: &SVector<X, N>, dx: &mut SVector<X, N>) {
+            let n = x.len();
+            let f = X::from(n - 1).unwrap().recip();
+            for i in 0..n {
+                let vel = self.vel.eval(t, x[i]);
+                let int = self.int.eval(t, x[i], x.iter().cloned());
+                let tot = vel + int;
+                let dens = if tot.is_sign_positive() {
+                    if i < n - 1 {
+                        f / (x[i + 1] - x[i])
+                    } else {
+                        X::zero()
+                    }
+                } else {
+                    if i > 0 {
+                        f / (x[i] - x[i - 1])
+                    } else {
+                        X::zero()
+                    }
+                };
+                let m = self.mob.eval(t, dens);
+                dx[i] = tot * m;
+            }
+        }
     }
 }
 
