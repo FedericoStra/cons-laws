@@ -80,8 +80,13 @@ pub trait Interaction<T, X = T> {
         P: IntoIterator<Item = X>;
 }
 
+/// A time-dependent mobility.
+pub trait Mobility<T, X = T> {
+    fn eval(&self, t: T, x: X) -> X;
+}
+
 mod _zero;
-pub use _zero::{ZeroInteraction, ZeroVelocity};
+pub use _zero::{OneMobility, ZeroInteraction, ZeroVelocity};
 
 pub struct Velocity<V>(V);
 

@@ -1,7 +1,8 @@
-use super::{ExternalVelocity, Interaction};
+use super::{ExternalVelocity, Interaction, Mobility};
 
 pub struct ZeroVelocity;
 pub struct ZeroInteraction;
+pub struct OneMobility;
 
 impl<T, X> ExternalVelocity<T, X> for ZeroVelocity
 where
@@ -23,5 +24,15 @@ where
         P: IntoIterator<Item = X>,
     {
         X::zero()
+    }
+}
+
+impl<T, X> Mobility<T, X> for OneMobility
+where
+    X: num_traits::One,
+{
+    #[inline]
+    fn eval(&self, _t: T, _x: X) -> X {
+        X::one()
     }
 }
