@@ -202,7 +202,7 @@ pub struct ConservationLaw<T, X, Vel, Int, Mob> {
 pub use _ode_solver::*;
 
 #[cfg(feature = "ode_solver")]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "ode_solver"))))]
+#[cfg_attr(docsrs, doc(cfg(feature = "ode_solver")))]
 mod _ode_solver {
     use super::*;
 
