@@ -200,12 +200,29 @@ where
     }
 }
 
-pub struct ConservationLaw<T, X, Vel, Int, Mob> {
+pub struct SingleSpeciesModel<T, X, Vel, Int, Mob> {
     pub vel: Vel,
     pub int: Int,
     pub mob: Mob,
     _t: std::marker::PhantomData<T>,
     _x: std::marker::PhantomData<X>,
+}
+
+impl<T, X, Vel, Int, Mob> SingleSpeciesModel<T, X, Vel, Int, Mob>
+where
+    Vel: ExternalVelocity<T, X>,
+    Int: Interaction<T, X>,
+    Mob: Mobility<T, X>,
+{
+    pub fn new(vel: Vel, int: Int, mob: Mob) -> Self {
+        Self {
+            vel,
+            int,
+            mob,
+            _t: std::marker::PhantomData,
+            _x: std::marker::PhantomData,
+        }
+    }
 }
 
 #[cfg(feature = "ode_solver")]
@@ -219,7 +236,7 @@ mod _ode_solver {
     use ode_solvers::{SVector, System};
 
     impl<X, Vel, Int, Mob, const N: usize> System<SVector<X, N>>
-        for ConservationLaw<f64, X, Vel, Int, Mob>
+        for SingleSpeciesModel<f64, X, Vel, Int, Mob>
     where
         Vel: ExternalVelocity<f64, X>,
         Int: Interaction<f64, X>,
