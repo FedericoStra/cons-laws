@@ -16,9 +16,7 @@
 <script>
     "use strict";
     document.addEventListener("DOMContentLoaded", function () {
-        var maths = document.getElementsByClassName("language-math");
-        for (var i = 0; i < maths.length; i++) {
-            var el = maths[i];
+        for (var el = document.getElementsByClassName("language-math")[0]; el !== undefined; el = document.getElementsByClassName("language-math")[0]) {
             katex.render(el.innerText, el, {displayMode: true});
             // replace outer <pre> with <p>
             var p = document.createElement("p");
