@@ -67,7 +67,72 @@
 //! $\bar\rho$ is the piecewise constant density $\sum_{i=1}^N \rho_i 1_{[x_{i-1},x_i]}$
 //! and $\dot\rho$ is the atomic measure $\frac1N \sum_{i=0}^N \delta_{x_i}$.
 //! Notice that $\dot\rho$ is not a probability.
-
+//!
+//! # Example
+//!
+//! This example requires the `ode_solver` feature.
+//!
+//! Consider the following external velocity, interaction potential and mobility:
+//!
+//! ```math
+//! \begin{aligned}
+//! V(t,x) &= \mathop{\mathrm{sign}}(7.5-t)
+//!     [2 + 0.5\sin(2x) + 0.3\sin(2\sqrt2x) + 0.2\cos(2\sqrt7x)] , \\
+//! W(t,x) &= (1 + \sin(t)) (x^2 - |x|) , \\
+//! v(t,\rho) &= (1-\rho)_+ .
+//! \end{aligned}
+//! ```
+//!
+//! The initial datum $\rho_0 = 1_{[-1.5,1.5]}$ is discretized $N=201$ with equally spaced particles.
+//!
+#![cfg_attr(feature = "ode_solver", doc = "```no_run")]
+#![cfg_attr(not(feature = "ode_solver"), doc = "```ignore")]
+//! use cons_laws::*;
+//! use ode_solvers::{dopri5::Dopri5, SVector};
+//!
+//! #[inline]
+//! fn V(t: f64, x: f64) -> f64 {
+//!     let sign = if t < 7.5 { 1.0 } else { -1.0 };
+//!     let magn = 2.0 + 0.5 * (2.0 * x).sin() + 0.3 * (2.0 * 2.0f64.sqrt() * x).sin()
+//!         + 0.2 * (2.0 * 7.0f64.sqrt() * x).cos();
+//!     sign * magn
+//! }
+//! #[inline]
+//! fn Wprime(t: f64, x: f64) -> f64 { (x + x - x.signum()) * (1.0 + t.sin()) }
+//! #[inline]
+//! fn W(t: f64, x: f64) -> f64 { (x * x - x.abs()) * (1.0 + t.sin()) }
+//! #[inline]
+//! fn v(t: f64, rho: f64) -> f64 { 0.0f64.max(1.0 - rho) }
+//!
+//! // define the model, using the sampled or integrated interaction
+//! let sampl_inter = SampledInteraction::new(Wprime);
+//! let integ_inter = SampledInteraction::new(W);
+//! let model = SingleSpeciesModel::new(V, sampl_inter, v);
+//!
+//! // initial condition
+//! const N: usize = 201;
+//! let x0 = SVector::<f64, N>::from_iterator((0..N).map(|i| 3.0 * i as f64 / (N - 1) as f64 - 1.5));
+//!
+//! // configure the solver
+//! let t_start = 0.0;
+//! let t_end = 15.0;
+//! let dt = 0.001;
+//! let rtol = 1e-10;
+//! let atol = 1e-10;
+//! let mut solver = Dopri5::new(model, t_start, t_end, dt, x0, rtol, atol);
+//!
+//! // solve the system of ODEs
+//! solver.integrate();
+//! let t = solver.x_out(); // times
+//! let x = solver.y_out(); // particles positions
+//! let n_steps = t.len();
+//! ```
+//! Plotting (some of) the trajectories with [`plotters`](https://crates.io/crates/plotters)
+//! produces the following picture:
+//!
+//! ![Traffic with `ode_solver` feature][traffic_ode_solver]
+//!
+#![doc = ::embed_doc_image::embed_image!("traffic_ode_solver", "doc/imgs/traffic_ode_solver.png")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 /// A time-dependent velocity field that affects the particles.
