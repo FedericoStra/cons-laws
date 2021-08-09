@@ -38,7 +38,7 @@ fn main() -> Result<(), &'static str> {
     println!("res = {:?}", res);
 
     let root_area =
-        BitMapBackend::new("./figures/traffic_ode_solver.png", (1200, 800)).into_drawing_area();
+        BitMapBackend::new("./figures/traffic_ode_solver.png", (800, 600)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut ctx = ChartBuilder::on(&root_area)
@@ -46,7 +46,7 @@ fn main() -> Result<(), &'static str> {
         .set_label_area_size(LabelAreaPosition::Left, 40)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .caption("Particle trajectories", ("Arial", 20))
-        .build_cartesian_2d(t_start..t_end, x[0][0]..x[x.len() - 1][N - 1])
+        .build_cartesian_2d(t_start..t_end, -1.5..7.0)
         .unwrap();
 
     ctx.configure_mesh()
@@ -62,11 +62,17 @@ fn main() -> Result<(), &'static str> {
         let mut graph: Vec<(f64, f64)> = Vec::with_capacity(t.len());
 
         for k in 0..t.len() {
-            graph.push((t[k], x[k][i]));
+            if k % 5 == 0 {
+                graph.push((t[k], x[k][i]));
+            }
         }
 
         ctx.draw_series(LineSeries::new(graph, &BLUE)).unwrap();
     }
+    ctx.draw_series(LineSeries::new([], &BLACK))
+        .unwrap()
+        .label("sampled")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     let system = SingleSpeciesModel::new(V, integ_inter, v);
 
@@ -97,11 +103,23 @@ fn main() -> Result<(), &'static str> {
         let mut graph: Vec<(f64, f64)> = Vec::with_capacity(t.len());
 
         for k in 0..t.len() {
-            graph.push((t[k], x[k][i]));
+            if k % 5 == 0 {
+                graph.push((t[k], x[k][i]));
+            }
         }
 
         ctx.draw_series(LineSeries::new(graph, &RED)).unwrap();
     }
+    ctx.draw_series(LineSeries::new([], &BLACK))
+        .unwrap()
+        .label("integrated")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+
+    ctx.configure_series_labels()
+        .position(SeriesLabelPosition::UpperRight)
+        .border_style(&BLACK)
+        .draw()
+        .unwrap();
 
     Ok(())
 }
@@ -109,10 +127,16 @@ fn main() -> Result<(), &'static str> {
 #[inline]
 #[allow(non_snake_case, unused_variables)]
 fn V<T: num_traits::real::Real>(t: T, x: T) -> T {
-    T::from(2).unwrap()
+    let sign = if t < T::from(7.5).unwrap() {
+        T::one()
+    } else {
+        -T::one()
+    };
+    let magn = T::from(2).unwrap()
         + T::from(0.5).unwrap() * (x + x).sin()
         + T::from(0.3).unwrap() * (T::from(2.0 * (2.0_f64).sqrt()).unwrap() * x).sin()
-        + T::from(0.2).unwrap() * (T::from(2.0 * (7.0_f64).sqrt()).unwrap() * x).cos()
+        + T::from(0.2).unwrap() * (T::from(2.0 * (7.0_f64).sqrt()).unwrap() * x).cos();
+    sign * magn
 }
 
 #[inline]
@@ -121,7 +145,7 @@ fn Wprime<T: num_traits::real::Real>(t: T, x: T) -> T {
     let one = T::one();
     let zero = T::zero();
     if x != zero {
-        x + x - x.signum()
+        (x + x - x.signum()) * (T::one() + t.sin())
     } else {
         zero
     }
@@ -130,7 +154,7 @@ fn Wprime<T: num_traits::real::Real>(t: T, x: T) -> T {
 #[inline]
 #[allow(non_snake_case, unused_variables)]
 fn W<T: num_traits::real::Real>(t: T, x: T) -> T {
-    x * x - x.abs()
+    (x * x - x.abs()) * (T::one() + t.sin())
 }
 
 #[inline]
