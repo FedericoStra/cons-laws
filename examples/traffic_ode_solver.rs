@@ -37,7 +37,8 @@ fn main() -> Result<(), &'static str> {
     println!("n_steps = {}\ntime = {:?}", n_steps, elapsed);
     println!("res = {:?}", res);
 
-    let root_area = BitMapBackend::new("./figures/traffic2.png", (1200, 800)).into_drawing_area();
+    let root_area =
+        BitMapBackend::new("./figures/traffic_ode_solver.png", (1200, 800)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut ctx = ChartBuilder::on(&root_area)
