@@ -23,3 +23,10 @@ You can cite the article as
 ```
 
 This is a reimplementation in Rust of the Julia package [ConservationLawsParticles.jl](https://github.com/FedericoStra/ConservationLawsParticles.jl).
+
+The goal of this crate is to solve non-local conservation laws with congestion of the form
+
+    ∂ₜρ + divₓ[ρ⋅v(ρ)⋅(V - ∂ₓW⋆ρ)] = 0
+
+via deterministic particle schemes.
+Plotting the trajectories of the particles produces images such as ![trajectories](doc/imgs/traffic_ode_solver.png)
