@@ -1,45 +1,9 @@
-use ode_solvers::{SVector, System};
+use ode_solvers::SVector;
 use plotters::prelude::*;
 
 use cons_laws::*;
 
-struct ConservationLaw<Vel, Int> {
-    vel: Vel,
-    int: Int,
-}
-
 const N: usize = 201;
-
-impl<Vel, Int> System<SVector<f64, N>> for ConservationLaw<Vel, Int>
-where
-    Vel: ExternalVelocity<f64>,
-    Int: Interaction<f64>,
-{
-    fn system(&self, t: f64, x: &SVector<f64, N>, dx: &mut SVector<f64, N>) {
-        let n = x.len();
-        let f = ((n - 1) as f64).recip();
-        for i in 0..n {
-            let vel = self.vel.eval(t, x[i]);
-            let int = self.int.eval(t, x[i], x.iter().cloned());
-            let tot = vel + int;
-            let dens = if tot.is_sign_positive() {
-                if i < n - 1 {
-                    f / (x[i + 1] - x[i])
-                } else {
-                    0.0
-                }
-            } else {
-                if i > 0 {
-                    f / (x[i] - x[i - 1])
-                } else {
-                    0.0
-                }
-            };
-            let m = v(dens);
-            dx[i] = tot * m;
-        }
-    }
-}
 
 fn main() -> Result<(), &'static str> {
     use ode_solvers::dopri5::*;
@@ -48,16 +12,14 @@ fn main() -> Result<(), &'static str> {
     let sampl_inter = SampledInteraction::new(Wprime);
     let integ_inter = IntegratedInteraction::new(W);
 
-    let system = ConservationLaw {
-        vel: V,
-        int: sampl_inter,
-    };
+    let system = SingleSpeciesModel::new(V, sampl_inter, v);
 
     let t_start = 0.0;
     let t_end = 15.0;
     let dt = 0.001;
 
-    let x0 = SVector::from_iterator((0..N).map(|i| 3.0 * i as f64 / (N - 1) as f64 - 1.5));
+    let x0 =
+        SVector::<f64, N>::from_iterator((0..N).map(|i| 3.0 * i as f64 / (N - 1) as f64 - 1.5));
 
     let rtol = 1e-10;
     let atol = 1e-10;
@@ -75,7 +37,7 @@ fn main() -> Result<(), &'static str> {
     println!("n_steps = {}\ntime = {:?}", n_steps, elapsed);
     println!("res = {:?}", res);
 
-    let root_area = BitMapBackend::new("./figures/traffic.png", (1200, 800)).into_drawing_area();
+    let root_area = BitMapBackend::new("./figures/traffic2.png", (1200, 800)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
     let mut ctx = ChartBuilder::on(&root_area)
@@ -105,16 +67,13 @@ fn main() -> Result<(), &'static str> {
         ctx.draw_series(LineSeries::new(graph, &BLUE)).unwrap();
     }
 
-    let system = ConservationLaw {
-        vel: V,
-        int: integ_inter,
-    };
+    let system = SingleSpeciesModel::new(V, integ_inter, v);
 
     let t_start = 0.0;
     let t_end = 15.0;
     let dt = 0.001;
 
-    let x0 = SVector::from_iterator((0..N).map(|i| 3.0 * i as f64 / (N - 1) as f64 - 1.5));
+    // let x0 = SVector::from_iterator((0..N).map(|i| 3.0 * i as f64 / (N - 1) as f64 - 1.5));
 
     let rtol = 1e-10;
     let atol = 1e-10;
@@ -175,6 +134,6 @@ fn W<T: num_traits::real::Real>(t: T, x: T) -> T {
 
 #[inline]
 #[allow(non_snake_case, unused_variables)]
-fn v<T: num_traits::real::Real>(rho: T) -> T {
+fn v<T: num_traits::real::Real>(t: T, rho: T) -> T {
     T::zero().max(T::one() - rho)
 }
