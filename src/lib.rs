@@ -119,6 +119,16 @@ where
     }
 }
 
+impl<T, X, F> Mobility<T, X> for F
+where
+    F: Fn(T, X) -> X,
+{
+    #[inline]
+    fn eval(&self, t: T, x: X) -> X {
+        self(t, x)
+    }
+}
+
 pub struct SampledInteraction<Wprime>(Wprime);
 
 impl<Wprime> SampledInteraction<Wprime> {
