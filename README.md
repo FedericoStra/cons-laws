@@ -4,6 +4,7 @@
 [![docs.rs](https://img.shields.io/docsrs/cons-laws)](https://docs.rs/cons-laws)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/FedericoStra/cons-laws/Rust)](https://github.com/FedericoStra/cons-laws/actions/workflows/rust.yml)
 [![MIT license](https://img.shields.io/crates/l/cons-laws)](https://choosealicense.com/licenses/mit/)
+![Lines of code](https://tokei.rs/b1/github/FedericoStra/cons-laws?category=code)
 
 This crate implements the deterministic particle schemes described in the article
 *Entropy solutions of non-local scalar conservation laws with congestion via deterministic particle method*, E. Radici, F. Stra (2021), [https://arxiv.org/abs/2107.10760](https://arxiv.org/abs/2107.10760).
